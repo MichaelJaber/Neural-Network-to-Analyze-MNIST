@@ -38,7 +38,7 @@ class Network(object):
             length_test = len(list(test_data))
         for i in range(batches):
             random.shuffle(training_data)
-            mini_batches = [training_data[i:i+mini_batch_size] for j in range(0, len(training_data), mini_batch_size)]
+            mini_batches = [training_data[j:j+mini_batch_size] for j in range(0, len(training_data), mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_network(mini_batch, learning_rate)
             if test_data:
@@ -94,7 +94,7 @@ class Network(object):
         grad_wrt_w[-1] = np.dot(delta, activations[-2].transpose())
         ## The following variables account for when the activation is at a hidden layer. 
         for l in range(2, self.num_layers):
-            delta = np.dot(self.weights[-l+1].transpose(), delta) * deriv_sigmoid(z[-l])
+            delta = np.dot(self.weights[-l+1].transpose(), delta) * deriv_sigmoid(zs[-l])
             
             grad_wrt_b[-l] = delta
             grad_wrt_w[-l] = np.dot(delta, activations[-l-1].transpose())
