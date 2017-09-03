@@ -12,7 +12,6 @@ class Network(object):
          since there is no bias present in the first layer of the network. """
         self.num_layers = len(layers)
         self.sizes = layers
-
         self.biases = [np.random.randn(y, 1) for y in layers[1:]]          # Creates an array representing all of the biases of each layer, 
                                                                           # The input layer is not included when creating the bias array,
                                                                           # since the bias is used to help calculate the output of a layer. 
@@ -58,28 +57,18 @@ class Network(object):
         grad_wrt_w = [np.zeros(w.shape) for w in self.weights]
         grad_wrt_b = [np.zeros(b.shape) for b in self.biases]
 
-        for x , y in list(mini_batch):
+        for x , y in mini_batch:
             delta_grad_wrt_b, delta_grad_wrt_w = self.backpropagation( x , y )
             grad_wrt_b = [dgrad_b + grad_b for dgrad_b, grad_b in zip(delta_grad_wrt_b, grad_wrt_b)]
             grad_wrt_w = [dgrad_w + grad_w for dgrad_w, grad_w in zip(delta_grad_wrt_w, grad_wrt_w)]
         
-        self.biases = [ b - ( learning_rate / len(mini_batch)) * grad_wrt_b
-                        for b, grad_wrt_b in zip(self.biases, grad_wrt_b)]
+        self.biases = [ b - ( learning_rate / len(mini_batch)) * grad_b
+                        for b, grad_b in zip(self.biases, grad_wrt_b)]
     
-        self.weights = [ w - ( learning_rate / len(mini_batch)) * grad_wrt_w
-                        for w , grad_wrt_w in zip(self.weights, grad_wrt_w)]
+        self.weights = [ w - ( learning_rate / len(mini_batch)) * grad_w
+                        for w , grad_w in zip(self.weights, grad_wrt_w)] 
+        #print("LOOK OVER HERE FAM UPDATE NET")
 
-
-
-    def evaluate_network(self, test_data):
-    # """ Takes in a tuple ( x , y ) and passes the input, x,
-    # throught the network. Then compares the final output from the
-    # forward pass with the correct label, y. Returns the amount of times 
-    # the network is correct in its evaluation of the image. """
-        test_results = [(np.argmax(self.forward_pass(x)), y) for (x , y) in test_data]
-        return sum(int(x == y) for (x , y) in test_results)
-
-    
 
     def backpropagation(self, x, y):
         """ Takes in a tuple ( x , y ) and returns the gradients with respect to 
@@ -93,7 +82,7 @@ class Network(object):
         activation = x
         activations = [x]                                # activations refers to the weighted inputs of each respective level, after being passed through the sigmoid activation function
         zs = []                                          # outputs refers the outputs of each respective level, excluding the sigmoid activation function
-        for w, b in list(zip(self.weights, self.biases)):
+        for w, b in zip(self.weights, self.biases):
             z = np.dot(w, activation) + b                # z can be visualized as a weighted input into a layer in the network
             zs.append(z)
             activation = sigmoid(z)
@@ -109,13 +98,24 @@ class Network(object):
             
             grad_wrt_b[-l] = delta
             grad_wrt_w[-l] = np.dot(delta, activations[-l-1].transpose())
+            #print("HEY IM OVER HERE BACKPROP")
         return(grad_wrt_b, grad_wrt_w)
+    
+    
+    def evaluate_network(self, test_data):
+        # """ Takes in a tuple ( x , y ) and passes the input, x,
+        # throught the network. Then compares the final output from the
+        # forward pass with the correct label, y. Returns the amount of times 
+        # the network is correct in its evaluation of the image. """
+            test_results = [(np.argmax(self.forward_pass(x)), y) for (x , y) in test_data]
+            return sum(int(x == y) for (x , y) in test_results)
+            #print("EVALUATE XD")
 
-
+    
     def cost_derivative(self, out_activation, y):
                 """ Derivative of the cost function, which in this case is
                 is a quadratic loss function. """
-                return out_activation - y
+                return (out_activation - y)
 
     
 
