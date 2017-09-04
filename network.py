@@ -1,10 +1,9 @@
-# import system
-
 import numpy as np
 
 import random
 
 class Network(object):
+
     def __init__(self, layers):
         """ Initalizes the weights and biases with a random array
          according to a normal distribuation, with a mean of 0,
@@ -19,39 +18,36 @@ class Network(object):
                         for x, y in zip(layers[:-1], layers[1:])]           # Creates an array representing all of the weights between the nodes of each respective layer,
                                                                           # There are no weights protruding out of the output layer.
 
-
-
-
     def forward_pass(self,a):
         """ Performs a forward pass through the neural network with input,
         a, applying the sigmoid function at each node """
         for w , b in zip(self.weights, self.biases):
             a = sigmoid(np.dot(w , a) + b)
         return a
-
-    def SGD(self, batches, mini_batch_size, learning_rate, training_data, test_data = None):
+    
+    def SGD(self, epochs, mini_batch_size, learning_rate, training_data, test_data = None):
         """ Stochastic gradient descent takes small batches of the training
         data, which will then be passed through the backpropagation algorithm.
         New weights and biases will be generated, and the network will be updated
         to reflect this. """
+        
         if test_data:
             length_test = len(list(test_data))
-        for i in range(batches):
+        for i in range(epochs):
             random.shuffle(training_data)
             mini_batches = [training_data[j:j+mini_batch_size] for j in range(0, len(training_data), mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_network(mini_batch, learning_rate)
             if test_data:
-                print ("Batch {0}  {1} / {2}".format(
+                print ("Epoch {0}  {1} / {2}".format(
                     i, self.evaluate_network(test_data), length_test))
             else:
-                print ("Batch {0} complete".format(i))
+                print ("Epoch {0} complete".format(i))
 
 
     def update_network(self, mini_batch, learning_rate):
         """ Updates the weights and biases of the network according to the new 
         values calculated by the backpropogation algorithm. """
-        
         # Creates an array of zeros in the same shape of weights and biases which
         # will later be filled in with the proper gradient values.
         grad_wrt_w = [np.zeros(w.shape) for w in self.weights]
@@ -98,7 +94,6 @@ class Network(object):
             
             grad_wrt_b[-l] = delta
             grad_wrt_w[-l] = np.dot(delta, activations[-l-1].transpose())
-            #print("HEY IM OVER HERE BACKPROP")
         return(grad_wrt_b, grad_wrt_w)
     
     
@@ -109,20 +104,12 @@ class Network(object):
         # the network is correct in its evaluation of the image. """
             test_results = [(np.argmax(self.forward_pass(x)), y) for (x , y) in test_data]
             return sum(int(x == y) for (x , y) in test_results)
-            #print("EVALUATE XD")
 
-    
+
     def cost_derivative(self, out_activation, y):
                 """ Derivative of the cost function, which in this case is
                 is a quadratic loss function. """
                 return (out_activation - y)
-
-    
-
-    
-
-
-   
 
 
 ###########################################################################################################################################
